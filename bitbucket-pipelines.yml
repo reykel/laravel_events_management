@@ -1,0 +1,12 @@
+# Deploy on remote server
+deployScriptDev: &deployScript
+  - apt-get update && apt-get -qq install ssh openssh-client
+  - ssh -i  ~/.ssh/config european@31.170.101.73 -p 64227 'cd /home2/european/public_html && git checkout package-lock.json && git checkout develop && git pull origin develop && /opt/cpanel/ea-php80/root/usr/bin/php -d memory_limit=-1 /opt/cpanel/composer/bin/composer install --ignore-platform-reqs && /opt/cpanel/ea-php80/root/usr/bin/php artisan cache:clear && scl enable rh-nodejs14 sh <<< "/opt/rh/rh-nodejs14/root/usr/bin/npm install --scripts-prepend-node-path && /opt/rh/rh-nodejs14/root/usr/bin/npm run dev --scripts-prepend-node-path"'
+
+pipelines:
+  branches:
+    develop:
+      - step:
+          name: Deploy for Staging
+          deployment: Staging
+          script: *deployScript
